@@ -11,8 +11,8 @@ The JasperViewerFX is a free JavaFX library. Its goal is avoid usage of default 
 - Fewer java code.
 
 # Requirements
-This library uses following JasperReport's dependencies on JasperViewerFX.jar, but if you want to compile yourself you can download Jasper and build it with ivy. 
-(Download: https://sourceforge.net/projects/jasperreports/files/jasperreports/)
+This library uses the following JasperReport's dependencies on JasperViewerFX.jar, but if you want to compile source yourself you can download [JasperReports](https://sourceforge.net/projects/jasperreports/files/jasperreports/) and build with ivy. 
+
 - commons-beanutils-1.9.3.jar
 - commons-collections-3.2.2.jar
 - commons-digester-2.1.jar
