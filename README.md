@@ -2,13 +2,13 @@
 
 The JasperViewerFX is a free JavaFX library. Its goal is avoid usage of default Swing JasperReport's viewer and abstract the java code used to generate output formats.
 
-![viewer](jasperviewer.png)
+![viewer](jasperviewer.gif)
 
 # Features
 - Exporting for PDF, HTML, XML (Without images), XLS, XLSX and CSV;
 - Zoom in / Zoom Out;
 - Minimalist interface completely writen in JavaFX;
-- Fewer java code.
+- Abstract JasperReports code.
 
 # Requirements
 This library uses the following JasperReport's dependencies on JasperViewerFX.jar, but if you want to compile source yourself you can download [JasperReports](https://sourceforge.net/projects/jasperreports/files/jasperreports/) and build with ivy. 
