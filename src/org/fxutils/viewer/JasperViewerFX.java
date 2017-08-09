@@ -216,12 +216,12 @@ public class JasperViewerFX {
 			if(newValue.intValue() == 1){
                 backPage.setDisable(true);
                 firstPage.setDisable(true);
-            }
+        	}
             
-            if (newValue.intValue() == reportPages){
-                nextPage.setDisable(true);
-                lastPage.setDisable(true);
-            }  
+        	if (newValue.intValue() == reportPages){
+            	nextPage.setDisable(true);
+            	lastPage.setDisable(true);
+        	}  
 		});
 	    
         // Those buttons must start disabled
