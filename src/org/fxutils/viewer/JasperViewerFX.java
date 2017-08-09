@@ -22,6 +22,9 @@ import java.net.URL;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
@@ -30,15 +33,16 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -60,24 +64,25 @@ import net.sf.jasperreports.export.SimpleWriterExporterOutput;
 /**
  * An simple approach to JasperViewer in JavaFX. Based on Michael Grecol approach.
  * @author Gustavo Fragoso
- * @date Aug 03, 2017
+ * @date Aug 09, 2017
  */
 public class JasperViewerFX {
     
     private final Stage dialog;
     private Button print,save,backPage,firstPage,nextPage,lastPage,zoomIn,zoomOut;
+    private Label bottomLabel;
     private ImageView report;
     private TextField txtPage;
-    private int reportPages;
-    private int currentPage = 0;
-    
+        
     // JasperReports variables
     private JasperReport jreport;
     private JasperPrint jprint;
     
-    // Zoom
-    private int imageHeight=0, imageWidth=0;
+    private int imageHeight = 0, imageWidth = 0, reportPages = 0;
     
+    // Property
+    private IntegerProperty currentPage;
+	
     public JasperViewerFX(Stage owner, String title, String jasper, HashMap params, Connection con){
         
         // Initializing window
@@ -97,7 +102,6 @@ public class JasperViewerFX {
             reportPages = jprint.getPages().size();
             
         } catch (JRException ex){
-
         }
     }
     
@@ -114,44 +118,55 @@ public class JasperViewerFX {
             URL arquivo = getClass().getResource(jasper);
             jreport = (JasperReport) JRLoader.loadObject(arquivo);
             jprint = JasperFillManager.fillReport(jreport, params, source);
-            imageHeight = jprint.getPageHeight()+284;
+            
+			imageHeight = jprint.getPageHeight()+284;
             imageWidth = jprint.getPageWidth()+201;
             reportPages = jprint.getPages().size();
             
         } catch (JRException ex){
         }
     }
-   
+
+    // ***********************************************
+    // Property
+    // ***********************************************
+    public void setCurrentPage(int page){
+        currentPage.set(page);
+        viewPage(page);
+    }
+    
+    public int getCurrentPage(){
+        return currentPage.get();
+    }
+    
+    // ***********************************************
+    // Methods
+    // ***********************************************
     private Scene createScene(){
         HBox menu = new HBox(5);
+		menu.setAlignment(Pos.CENTER);
         menu.setPrefHeight(50.0);
-        menu.setAlignment(Pos.CENTER);
         
-        ImageView b1 = new ImageView("/org/fxutils/icons/printer.png");
-        ImageView b2 = new ImageView("/org/fxutils/icons/save.png");
-        ImageView b3 = new ImageView("/org/fxutils/icons/backimg.png");
-        ImageView b4 = new ImageView("/org/fxutils/icons/firstimg.png");
-        ImageView b5 = new ImageView("/org/fxutils/icons/nextimg.png");
-        ImageView b6 = new ImageView("/org/fxutils/icons/lastimg.png");
-        ImageView b7 = new ImageView("/org/fxutils/icons/zoomin.png");
-        ImageView b8 = new ImageView("/org/fxutils/icons/zoomout.png");
+        // Menu's buttons
+        print = new Button(null, new ImageView("/org/fxutils/icons/printer.png"));
+        save = new Button(null, new ImageView("/org/fxutils/icons/save.png"));
+        backPage = new Button(null, new ImageView("/org/fxutils/icons/backimg.png"));
+        firstPage = new Button(null, new ImageView("/org/fxutils/icons/firstimg.png"));
+        nextPage = new Button(null, new ImageView("/org/fxutils/icons/nextimg.png"));        
+        lastPage = new Button(null, new ImageView("/org/fxutils/icons/lastimg.png"));
+        zoomIn = new Button(null, new ImageView("/org/fxutils/icons/zoomin.png"));
+        zoomOut = new Button(null,new ImageView("/org/fxutils/icons/zoomout.png"));       
         
-        print = new Button(null,b1);
+        // Pref sizes
         print.setPrefSize(30, 30);
-        save = new Button(null,b2);
         save.setPrefSize(30, 30);
-        backPage = new Button(null,b3);
         backPage.setPrefSize(30, 30);
-        firstPage = new Button(null,b4);
         firstPage.setPrefSize(30, 30);
-        nextPage = new Button(null,b5);
         nextPage.setPrefSize(30, 30);
-        lastPage = new Button(null,b6);
         lastPage.setPrefSize(30, 30);
-        zoomIn = new Button(null,b7);
         zoomIn.setPrefSize(30, 30);
-        zoomOut = new Button(null,b8);
         zoomOut.setPrefSize(30, 30);
+        
         txtPage = new TextField("1");
         txtPage.setPrefSize(75,30);
         
@@ -172,10 +187,14 @@ public class JasperViewerFX {
         ScrollPane scroll = new ScrollPane(stack);
         scroll.setFitToWidth(true);
         scroll.setFitToHeight(true);
-
+	
+		// Bottom label
+        bottomLabel = new Label();
+	
         BorderPane root = new BorderPane();
         root.setCenter(scroll);
         root.setTop(menu);
+        root.setBottom(bottomLabel);
         
         Scene scene = new Scene(root,1024,768);
 
@@ -183,8 +202,28 @@ public class JasperViewerFX {
     }
     
     private void start(){
-        viewPage(0);
+		currentPage = new SimpleIntegerProperty(this, "currentPage");
+        setCurrentPage(1);
+		
+		// Bottom label
+        bottomLabel.setText("Page 1 of " + reportPages);
         
+		// Visual feedback of reading progress
+		currentPage.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+			bottomLabel.setText("Page " + newValue + " of " + reportPages);
+			txtPage.setText(newValue.toString());
+			
+			if(newValue.intValue() == 1){
+                backPage.setDisable(true);
+                firstPage.setDisable(true);
+            }
+            
+            if (newValue.intValue() == reportPages){
+                nextPage.setDisable(true);
+                lastPage.setDisable(true);
+            }  
+		});
+	    
         // Those buttons must start disabled
         backPage.setDisable(true);
         firstPage.setDisable(true);
@@ -193,23 +232,23 @@ public class JasperViewerFX {
         if(reportPages == 1){
             nextPage.setDisable(true);
             lastPage.setDisable(true);
-        }else{
-            backPage.setOnAction((ActionEvent event) -> {
-                backAction();
-            });
-
-            firstPage.setOnAction((ActionEvent event) -> {
-                firstPageAction();
-            });
-        
-            nextPage.setOnAction((ActionEvent event) -> {
-                nextAction();
-            });
-
-            lastPage.setOnAction((ActionEvent event) -> {
-                lastPageAction();
-            });
         }
+		
+        backPage.setOnAction((ActionEvent event) -> {
+            backAction();
+        });
+
+        firstPage.setOnAction((ActionEvent event) -> {
+        	firstPageAction();
+        });
+        
+        nextPage.setOnAction((ActionEvent event) -> {
+            nextAction();
+        });
+
+        lastPage.setOnAction((ActionEvent event) -> {
+            lastPageAction();
+        });
         
         print.setOnAction((ActionEvent event) -> { 
             printAction();
@@ -230,13 +269,16 @@ public class JasperViewerFX {
             if (event.getCode() == KeyCode.ENTER) {
                 try {
                     int p = Integer.parseInt(txtPage.getText());
-                    if(p>reportPages){
-                        txtPage.setText(Integer.toString(reportPages));
-                        viewPage(reportPages-1);
+                    if(p > reportPages){
+                        setCurrentPage(reportPages);
                     }else{
-                        viewPage(p - 1);
+						if(p > 0){
+                        	setCurrentPage(p);
+						}else{
+							setCurrentPage(1);
+						}
                     }
-                } catch (Exception e) {                    
+                } catch (NumberFormatException e) {                    
                     Alert dialog1 = new Alert(Alert.AlertType.WARNING, "Invalid number", ButtonType.OK);
                     dialog1.show();
                 }
@@ -244,21 +286,9 @@ public class JasperViewerFX {
         });
     }
     
-    // ***********************************************
-    // Methods
-    // ***********************************************
-    
     private void backAction(){
-        if(currentPage - 1 > -1){
-            currentPage--;
-            txtPage.setText(Integer.toString(currentPage+1));
-            viewPage(currentPage);
-        }
-        
-        if(currentPage == 0){
-            backPage.setDisable(true);
-            firstPage.setDisable(true);
-        }
+        int newValue = getCurrentPage() - 1;
+        setCurrentPage(newValue);
         
         // Turn foward buttons on again
         if (nextPage.isDisabled()){
@@ -268,14 +298,7 @@ public class JasperViewerFX {
     }
     
     private void firstPageAction(){
-        txtPage.setText("1");
-        currentPage = 0;
-        viewPage(0);
-        
-        if(currentPage == 0){
-            backPage.setDisable(true);
-            firstPage.setDisable(true);
-        }
+        setCurrentPage(1);
         
         // Turn foward buttons on again
         if (nextPage.isDisabled()){
@@ -285,17 +308,8 @@ public class JasperViewerFX {
     }    
     
     private void nextAction(){
-        if(currentPage + 1 < reportPages){
-            currentPage++;
-            txtPage.setText(Integer.toString(currentPage+1));
-            viewPage(currentPage);
-        }
-        
-        // Disable on last page
-        if (currentPage == reportPages - 1){
-            nextPage.setDisable(true);
-            lastPage.setDisable(true);
-        }
+        int newValue = getCurrentPage() + 1;
+        setCurrentPage(newValue);
         
         // Turn previous button on again
         if (backPage.isDisabled()){
@@ -305,15 +319,7 @@ public class JasperViewerFX {
     }
     
     private void lastPageAction(){
-        txtPage.setText(Integer.toString(reportPages));
-        currentPage = reportPages-1;
-        viewPage(currentPage);
-        
-        // Disable on last page
-        if (currentPage == reportPages -1){
-            nextPage.setDisable(true);
-            lastPage.setDisable(true);
-        }
+        setCurrentPage(reportPages);
         
         // Turn previous button on again
         if (backPage.isDisabled()){
@@ -412,7 +418,7 @@ public class JasperViewerFX {
     private void viewPage(int page){
         try {
             float zoom = (float) 1.33;
-            BufferedImage image = (BufferedImage)JasperPrintManager.printPageToImage(jprint, page, zoom);
+            BufferedImage image = (BufferedImage)JasperPrintManager.printPageToImage(jprint, page - 1, zoom);
             WritableImage fxImage = new WritableImage(imageHeight,imageWidth);
             report.setImage(SwingFXUtils.toFXImage(image, fxImage));
         } catch (JRException ex) {
