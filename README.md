@@ -61,7 +61,7 @@ public class Car {
 }
 
 ObservableList<Car> cars = FXCollections.observableArrayList();
-cars.add(new Car("Fiat");
+cars.add(new Car("Fiat"));
 
 // Bean will fill $F{model}
 JRBeanCollectionDataSource array = new JRBeanCollectionDataSource((ObservableList<Car>) cars);
