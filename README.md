@@ -23,13 +23,49 @@ This library uses the following JasperReport's dependencies on JasperViewerFX.ja
 
 # How to use
 
-If you want to use an JDBC connection:
+## Explaining params
+stage: Pass the actual stage that will own the dialog
+
+title: Your Dialog Title
+
+path: An relative path to .jasper
+
+params: An HashMap with params that will be send to report and fill fields with $P{paramname}
+
+connection: JDBC connection with some database
+
+JRBeanCollectionDatasource: For program generated source
+
+## Example with JDBC connection
+
 ```java
+Connection connection = new ConnectionFactory().getConnection();
+
+// Will fill $P tags
+Map params = new HashMap<>();
+params.put("username", application.getUsername());
+
 JasperViewerFX viewer = new JasperViewerFX(stage, "Title", "relative path to .jasper", params, connection);
 viewer.show();
 ```
-If you want to use an java datasource:
+
+## Example with JRBeanCollectionDataSource:
+
 ```java
-JasperViewerFX viewer = new JasperViewerFX(stage, "Title", "relative path to .jasper", params, JRBeanCollectionDataSource);
+public class Car {
+  String model;
+  
+  public Car(String model) {
+    this.model = model;
+  }
+}
+
+ObservableList<Car> cars = FXCollections.observableArrayList();
+cars.add(new Car("Fiat");
+
+// Bean will fill $F{model}
+JRBeanCollectionDataSource array = new JRBeanCollectionDataSource((ObservableList<Car>) cars);
+
+JasperViewerFX viewer = new JasperViewerFX(stage, "Title", "relative path to .jasper", null, array);
 viewer.show();
 ```
