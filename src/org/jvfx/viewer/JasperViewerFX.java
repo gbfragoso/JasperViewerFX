@@ -69,9 +69,6 @@ public class JasperViewerFX {
 	// ***********************************************
 	// Scene and button actions
 	// ***********************************************
-	// ***********************************************
-	// Methods
-	// ***********************************************
 	private Scene createScene() {
 
 		// Menu's buttons
@@ -277,7 +274,6 @@ public class JasperViewerFX {
 			zoom(-0.15);
 		});
 	}
-	
 
 	/**
 	 * Set the currentPage property and render report page 
@@ -311,15 +307,15 @@ public class JasperViewerFX {
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Get the current page
+	 * @return Current page value
 	 */
 	public int getCurrentPage() {
 		return currentPage.get();
 	}
 	
 	/**
-	 * 
+	 * Get the currentPage property
 	 * @return
 	 */
 	public SimpleIntegerProperty currentPageProperty() {
