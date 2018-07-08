@@ -8,6 +8,7 @@ import java.util.List;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -111,12 +112,12 @@ public class JasperViewerFX {
 			}
 		});
 		
-		lblReportPages = new Label(" / 1");
+		lblReportPages = new Label("/ 1");
 
 		HBox menu = new HBox(5);
 		menu.setAlignment(Pos.CENTER);
+		menu.setPadding(new Insets(5));
 		menu.setPrefHeight(50.0);
-		menu.getStyleClass().setAll("jvfx-menu");
 		menu.getChildren().addAll(print, save, firstPage, backPage, txtPage, lblReportPages, nextPage, lastPage, zoomIn, zoomOut);
 
 		// This imageview will preview the pdf inside scrollpane
@@ -129,7 +130,7 @@ public class JasperViewerFX {
 
 		StackPane stack = new StackPane(contentGroup);
 		stack.setAlignment(Pos.CENTER);
-		stack.getStyleClass().setAll("jvfx-report-background");
+		stack.setStyle("-fx-background-color: gray");
 
 		ScrollPane scroll = new ScrollPane(stack);
 		scroll.setFitToWidth(true);
@@ -368,7 +369,7 @@ public class JasperViewerFX {
 		imageHeight = jasperPrint.getPageHeight() + 284;
 		imageWidth = jasperPrint.getPageWidth() + 201;
 		reportPages = jasperPrint.getPages().size();
-		lblReportPages.setText(" / " + reportPages);
+		lblReportPages.setText("/ " + reportPages);
 		
 		setCurrentPage(1);
 
