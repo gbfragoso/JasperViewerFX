@@ -2,7 +2,6 @@ package org.jvfx.viewer;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.InputStream;
 import java.util.List;
 
 import javafx.beans.property.SimpleIntegerProperty;
@@ -26,15 +25,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperPrintManager;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import net.sf.jasperreports.engine.util.JRLoader;
-import net.sf.jasperreports.engine.xml.JRPrintXmlLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
@@ -322,40 +318,7 @@ public class JasperViewerFX {
 	public SimpleIntegerProperty currentPageProperty() {
 		return currentPage;
 	}
-	
-	/**
-	 * Load report from file using JasperReportFileResolver 
-	 * @param title Dialog title
-	 * @param sourceFile Path to source file
-	 * @param isXMLFile
-	 * @throws JRException
-	 */
-	public void viewReport(String title, String sourceFile, boolean isXMLFile) throws JRException {
 		
-		if (isXMLFile) {
-			viewReport(title, JRPrintXmlLoader.loadFromFile(DefaultJasperReportsContext.getInstance(), sourceFile));
-		} else {
-			viewReport(title, (JasperPrint)JRLoader.loadObjectFromFile(sourceFile));
-		}
-		
-	}
-	
-	/**
-	 * Load report from InputStream
-	 * @param title Dialog title
-	 * @param is InputStream
-	 * @param isXMLFile
-	 * @throws JRException
-	 */
-	public void viewReport(String title, InputStream is, boolean isXMLFile) throws JRException {
-		
-		if (isXMLFile) {
-			viewReport(title, JRPrintXmlLoader.load(DefaultJasperReportsContext.getInstance(), is));
-		} else {
-			viewReport(title, (JasperPrint)JRLoader.loadObject(is));
-		}
-	}
-	
 	/**
 	 * Load report from JasperPrint
 	 * @param title Dialog title
