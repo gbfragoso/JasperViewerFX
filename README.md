@@ -2,7 +2,7 @@
 
 The JasperViewerFX aims to avoid usage of default Swing JasperReport's viewer. This viewer use SwingFXUtils to render only one page at time and append the output image to an ImageView.
 
-[!view.jpeg]
+[!Viewer image](view.jpeg)
 
 # Limitations
 
