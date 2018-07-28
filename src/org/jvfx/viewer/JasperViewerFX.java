@@ -17,6 +17,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.HBox;
@@ -59,6 +60,7 @@ public class JasperViewerFX {
 		dialog.initModality(Modality.WINDOW_MODAL);
 		dialog.initOwner(owner);
 		dialog.setScene(createScene());
+		dialog.getIcons().add(new Image("/org/jvfx/icons/printer.png"));
 		
 		currentPage = new SimpleIntegerProperty(this, "currentPage", 1);
 	}
