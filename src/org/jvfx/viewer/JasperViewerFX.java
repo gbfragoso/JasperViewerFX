@@ -10,14 +10,14 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
@@ -42,7 +42,7 @@ import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
  * @author Gustavo Fragoso
  * @version 3.1
  */
-public class JasperViewerFX {
+public class JasperViewerFX extends Dialog<Void>{
 
     private Button print, save, backPage, firstPage, nextPage, lastPage, zoomIn, zoomOut;
     private ImageView report;
@@ -54,13 +54,14 @@ public class JasperViewerFX {
 
     private SimpleIntegerProperty currentPage;
     private int imageHeight = 0, imageWidth = 0, reportPages = 0;
+    private DialogPane dialogPane;
     
     public JasperViewerFX(Stage owner) {
-        dialog = new Stage();
-        dialog.initModality(Modality.WINDOW_MODAL);
-        dialog.initOwner(owner);
-        dialog.setScene(createScene());
-        dialog.getIcons().add(new Image("/org/jvfx/icons/jasperlogo.jpg"));
+        initModality(Modality.WINDOW_MODAL);
+        dialogPane = getDialogPane();
+        dialogPane.setContent(createContentPane());
+        dialogPane.getButtonTypes().add(ButtonType.CLOSE);
+        dialogPane.lookupButton(ButtonType.CLOSE).setVisible(false);
         
         currentPage = new SimpleIntegerProperty(this, "currentPage", 1);
     }
@@ -68,7 +69,7 @@ public class JasperViewerFX {
     // ***********************************************
     // Scene and button actions
     // ***********************************************
-    private Scene createScene() {
+    private BorderPane createContentPane() {
         print = new Button(null, new ImageView("/org/jvfx/icons/printer.png"));
         save = new Button(null, new ImageView("/org/jvfx/icons/save.png"));
         backPage = new Button(null, new ImageView("/org/jvfx/icons/backimg.png"));
@@ -136,8 +137,9 @@ public class JasperViewerFX {
         BorderPane root = new BorderPane();
         root.setTop(menu);
         root.setCenter(scroll);
+        root.setPrefSize(1024, 768);
 
-        return new Scene(root, 1024, 768);
+        return root;
     }
 
     private void backAction() {
@@ -194,9 +196,8 @@ public class JasperViewerFX {
         print.setOnAction((ActionEvent event) -> {
             try {
                 JasperPrintManager.printReport(jasperPrint, true);
-                dialog.hide();
             } catch (JRException ex) {
-                System.out.println(ex.getMessage());
+                ex.printStackTrace();
             }
         });
     }
@@ -299,7 +300,7 @@ public class JasperViewerFX {
                 report.setImage(SwingFXUtils.toFXImage(image, fxImage));
             }
         } catch (JRException ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
     
@@ -341,8 +342,8 @@ public class JasperViewerFX {
             lastPage.setDisable(true);
         }
 
-        dialog.setTitle(title);
-        dialog.show();
+        setTitle(title);
+        show();
     }
     
     /**
