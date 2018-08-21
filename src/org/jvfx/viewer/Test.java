@@ -44,7 +44,7 @@ public class Test extends Application {
 				Connection con = new ConnectionManager().getConnection();
 				JasperReport jreport = (JasperReport) JRLoader.loadObject(getClass().getResource("/org/jvfx/example/simple_report.jasper"));
 				JasperPrint jprint = JasperFillManager.fillReport(jreport, null, con);
-				new JasperViewerFX(primaryStage).viewReport("Simple report", jprint);
+				new JasperViewerFX().viewReport("Simple report", jprint);
 				con.close();
 			} catch (JRException | SQLException e) {
 				e.printStackTrace();
@@ -71,7 +71,7 @@ public class Test extends Application {
 				JRBeanCollectionDataSource source = new JRBeanCollectionDataSource(collection);
 				JasperReport jreport = (JasperReport) JRLoader.loadObject(getClass().getResource("/org/jvfx/example/bean_report.jasper"));
 				JasperPrint jprint = JasperFillManager.fillReport(jreport, null, source);
-				new JasperViewerFX(primaryStage).viewReport("JRBeanCollectionDataSource example", jprint);
+				new JasperViewerFX().viewReport("JRBeanCollectionDataSource example", jprint);
 			} catch (JRException e) {
 				e.printStackTrace();
 			}
@@ -103,7 +103,7 @@ public class Test extends Application {
 				params.put("SUBREPORT_PATH", subreport.getPath());
 				
 				JasperPrint jprint = JasperFillManager.fillReport(jreport, params, new JRBeanCollectionDataSource(artists));
-				new JasperViewerFX(primaryStage).viewReport("JRBeanCollectionDataSource example", jprint);
+				new JasperViewerFX().viewReport("JRBeanCollectionDataSource example", jprint);
 			} catch (JRException e) {
 				e.printStackTrace();
 			}

@@ -40,7 +40,7 @@ import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
  * approach.
  * 
  * @author Gustavo Fragoso
- * @version 3.1
+ * @version 3.2
  */
 public class JasperViewerFX extends Dialog<Void>{
 
@@ -56,7 +56,7 @@ public class JasperViewerFX extends Dialog<Void>{
     private int imageHeight = 0, imageWidth = 0, reportPages = 0;
     private DialogPane dialogPane;
     
-    public JasperViewerFX(Stage owner) {
+    public JasperViewerFX() {
         initModality(Modality.WINDOW_MODAL);
         dialogPane = getDialogPane();
         dialogPane.setContent(createContentPane());
