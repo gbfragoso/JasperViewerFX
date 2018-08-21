@@ -58,6 +58,8 @@ public class JasperViewerFX extends Dialog<Void>{
     
     public JasperViewerFX() {
         initModality(Modality.WINDOW_MODAL);
+        setResizable(true);
+        
         dialogPane = getDialogPane();
         dialogPane.setContent(createContentPane());
         dialogPane.getButtonTypes().add(ButtonType.CLOSE);
