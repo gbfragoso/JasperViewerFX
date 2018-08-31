@@ -15,15 +15,21 @@ JasperReports draw engine relies on awt graphics, drawing each element on a Grap
 - Interface completely written in JavaFX;
 - Current page property.
 
-# Minimum setup
+# Dependencies
+```
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>6.7.0</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+```
 
-- commons-beanutils-1.9.3.jar
-- commons-collections-3.2.2.jar
-- commons-digester-2.1.jar
-- commons-javaflow-20160505.jar
-- commons-logging-1.1.1.jar
-- itext-2.1.7.js6.jar
-- jasperreports-6.0.0.jar (or above)
+## Minimal Setup
+
+- Tested with: jasperreports-6.0.0.jar (or above) and Java 8
 
 # Older versions
 
@@ -36,7 +42,7 @@ In older versions of this project the JasperPrint's generation method has been a
 ```java
 try {
 	Connection con = new ConnectionManager().getConnection();
-	JasperReport jreport = (JasperReport) JRLoader.loadObject(getClass().getResource("/org/jvfx/example/simple_report.jasper"));
+	JasperReport jreport = (JasperReport) JRLoader.loadObject(getClass().getResource("your_resource_path"));
 	JasperPrint jprint = JasperFillManager.fillReport(jreport, null, con);
 	new JasperViewerFX(primaryStage).viewReport("Simple report", jprint);
 	con.close();
@@ -45,4 +51,15 @@ try {
 }
 ```
 
-Look [Test.java](org/jvfx/viewer/Test.java) to see this code in action and other examples as well.
+## Example with JRBeanCollectionDataSource
+
+```java
+try {
+	JRBeanCollectionDataSource source = new JRBeanCollectionDataSource(collection);
+	JasperReport jreport = (JasperReport) JRLoader.loadObject(getClass().getResource("/org/jvfx/example/bean_report.jasper"));
+	JasperPrint jprint = JasperFillManager.fillReport(jreport, null, source);
+	new JasperViewerFX().viewReport("JRBeanCollectionDataSource example", jprint);
+	} catch (JRException e) {
+		e.printStackTrace();
+	}
+```

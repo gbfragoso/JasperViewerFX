@@ -1,4 +1,4 @@
-package org.jvfx.viewer;
+package com.github.gbfragoso;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -36,11 +36,10 @@ import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 /**
- * An simple approach to JasperViewer in JavaFX. Based on Michael Grecol
- * approach.
+ * An simple approach to JasperViewer in JavaFX. 
  * 
  * @author Gustavo Fragoso
- * @version 3.2
+ * @version 3.3
  */
 public class JasperViewerFX extends Dialog<Void>{
 
@@ -72,14 +71,14 @@ public class JasperViewerFX extends Dialog<Void>{
     // Scene and button actions
     // ***********************************************
     private BorderPane createContentPane() {
-        print = new Button(null, new ImageView("/org/jvfx/icons/printer.png"));
-        save = new Button(null, new ImageView("/org/jvfx/icons/save.png"));
-        backPage = new Button(null, new ImageView("/org/jvfx/icons/backimg.png"));
-        firstPage = new Button(null, new ImageView("/org/jvfx/icons/firstimg.png"));
-        nextPage = new Button(null, new ImageView("/org/jvfx/icons/nextimg.png"));
-        lastPage = new Button(null, new ImageView("/org/jvfx/icons/lastimg.png"));
-        zoomIn = new Button(null, new ImageView("/org/jvfx/icons/zoomin.png"));
-        zoomOut = new Button(null, new ImageView("/org/jvfx/icons/zoomout.png"));
+        print = new Button(null, new ImageView(getClass().getResource("printer.png").toExternalForm()));
+        save = new Button(null, new ImageView(getClass().getResource("save.png").toExternalForm()));
+        backPage = new Button(null, new ImageView(getClass().getResource("backimg.png").toExternalForm()));
+        firstPage = new Button(null, new ImageView(getClass().getResource("firstimg.png").toExternalForm()));
+        nextPage = new Button(null, new ImageView(getClass().getResource("nextimg.png").toExternalForm()));
+        lastPage = new Button(null, new ImageView(getClass().getResource("lastimg.png").toExternalForm()));
+        zoomIn = new Button(null, new ImageView(getClass().getResource("zoomin.png").toExternalForm()));
+        zoomOut = new Button(null, new ImageView(getClass().getResource("zoomout.png").toExternalForm()));
 
         // Pref sizes
         print.setPrefSize(30, 30);
