@@ -43,16 +43,25 @@ import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
  */
 public class JasperViewerFX extends Dialog<Void>{
 
-    private Button print, save, backPage, firstPage, nextPage, lastPage, zoomIn, zoomOut;
+    private Button print; 
+    private Button save; 
+    private Button backPage; 
+    private Button firstPage; 
+    private Button nextPage; 
+    private Button lastPage; 
+    private Button zoomIn; 
+    private Button zoomOut;
     private ImageView report;
     private Label lblReportPages;
-    private Stage dialog;
+    private Stage view;
     private TextField txtPage;
 
     private JasperPrint jasperPrint;
 
     private SimpleIntegerProperty currentPage;
-    private int imageHeight = 0, imageWidth = 0, reportPages = 0;
+    private int imageHeight = 0; 
+    private int imageWidth = 0;
+    private int reportPages = 0;
     private DialogPane dialogPane;
     
     public JasperViewerFX() {
@@ -101,7 +110,7 @@ public class JasperViewerFX extends Dialog<Void>{
 
         txtPage = new TextField("1");
         txtPage.setPrefSize(40, 30);
-        txtPage.setOnAction((ActionEvent event) -> {
+        txtPage.setOnAction(event -> {
             try {
                 int p = Integer.parseInt(txtPage.getText());
                 setCurrentPage((p > 0 && p <= reportPages) ? p : 1);
@@ -208,7 +217,7 @@ public class JasperViewerFX extends Dialog<Void>{
         save.setOnAction((ActionEvent event) -> {
             
             FileChooser chooser = new FileChooser();
-            FileChooser.ExtensionFilter pdf = new FileChooser.ExtensionFilter("Portable Document Format (*.pdf)", "*.pdf");
+            FileChooser.ExtensionFilter pdf = new FileChooser.ExtensionFilter("Portable Document Format", "*.pdf");
             FileChooser.ExtensionFilter html = new FileChooser.ExtensionFilter("HyperText Markup Language", "*.html");
             FileChooser.ExtensionFilter xml = new FileChooser.ExtensionFilter("eXtensible Markup Language", "*.xml");
             FileChooser.ExtensionFilter xls = new FileChooser.ExtensionFilter("Microsoft Excel 2007", "*.xls");
@@ -217,62 +226,101 @@ public class JasperViewerFX extends Dialog<Void>{
             
             chooser.setTitle("Salvar");
             chooser.setSelectedExtensionFilter(pdf);
-            File file = chooser.showSaveDialog(dialog);
+            File file = chooser.showSaveDialog(view);
             
             if (file != null) {
                 List<String> box = chooser.getSelectedExtensionFilter().getExtensions();
+                
                 switch (box.get(0)) {
-                case "*.pdf":
-                    try {
-                        JasperExportManager.exportReportToPdfFile(jasperPrint, file.getPath());
-                    } catch (JRException ex) {
-                    }
-                    break;
-                case "*.html":
-                    try {
-                        JasperExportManager.exportReportToHtmlFile(jasperPrint, file.getPath());
-                    } catch (JRException ex) {
-                    }
-                    break;
-                case "*.xml":
-                    try {
-                        JasperExportManager.exportReportToXmlFile(jasperPrint, file.getPath(), false);
-                    } catch (JRException ex) {
-                    }
-                    break;
-                case "*.xls":
-                    try {
-                        JRXlsExporter exporter = new JRXlsExporter();
-                        exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-                        exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(file));
-                        exporter.exportReport();
-                    } catch (JRException ex) {
-                    }
-                    break;
-                case "*.xlsx":
-                    try {
-                        JRXlsxExporter exporter = new JRXlsxExporter();
-                        exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-                        exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(file));
-                        exporter.exportReport();
-                    } catch (JRException ex) {
-                    }
-                    break;
+                    case "*.pdf":
+                        exportToPdf(file);
+                        break;
+                    case "*.html":
+                        exportToHtml(file);
+                        break;
+                    case "*.xml":
+                        exportToXml(file);
+                        break;
+                    case "*.xls":
+                        exportToXls(file);
+                        break;
+                    case "*.xlsx":
+                        exportToXlsx(file);
+                        break;
+                    default:
+                        exportToPdf(file);
                 }
             }
         });
     }
+
+    /**
+     * Export report to html file
+     */
+    public void exportToHtml(File file) {
+        try {
+            JasperExportManager.exportReportToHtmlFile(jasperPrint, file.getPath());
+        } catch (JRException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    /**
+     * Export report to Pdf file
+     */
+    public void exportToPdf(File file) {
+        try {
+            JasperExportManager.exportReportToPdfFile(jasperPrint, file.getPath());
+        } catch (JRException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Export report to old Microsoft Excel file
+     */
+    public void exportToXls(File file) {
+        try {
+            JRXlsExporter exporter = new JRXlsExporter();
+            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(file));
+            exporter.exportReport();
+        } catch (JRException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Export report to Microsoft Excel file
+     */
+    public void exportToXlsx(File file) {
+        try {
+            JRXlsxExporter exporter = new JRXlsxExporter();
+            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(file));
+            exporter.exportReport();
+        } catch (JRException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    /**
+     * @param file
+     */
+    public void exportToXml(File file) {
+        try {
+            JasperExportManager.exportReportToXmlFile(jasperPrint, file.getPath(), false);
+        } catch (JRException ex) {
+            ex.printStackTrace();
+        }
+    }
     
     private void zoomInAction() {
-        zoomIn.setOnAction((ActionEvent event) -> {
-            zoom(0.15);
-        });
+        zoomIn.setOnAction(event -> zoom(0.15));
     }
         
     private void zoomOutAction() {
-        zoomOut.setOnAction((ActionEvent event) -> {
-            zoom(-0.15);
-        });
+        zoomOut.setOnAction(event -> zoom(-0.15));
     }
 
     /**
