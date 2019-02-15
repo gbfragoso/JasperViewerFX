@@ -6,11 +6,9 @@ import java.util.List;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -18,12 +16,14 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import net.sf.jasperreports.engine.JRException;
@@ -43,14 +43,15 @@ import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
  */
 public class JasperViewerFX extends Dialog<Void>{
 
-    private Button print; 
-    private Button save; 
-    private Button backPage; 
-    private Button firstPage; 
-    private Button nextPage; 
-    private Button lastPage; 
-    private Button zoomIn; 
-    private Button zoomOut;
+    private Button btnPrint; 
+    private Button btnSave; 
+    private Button btnBackPage; 
+    private Button btnFirstPage; 
+    private Button btnNextPage; 
+    private Button btnLastPage; 
+    private Button btnZoomIn; 
+    private Button btnZoomOut;
+    private DialogPane dialogPane;
     private ImageView report;
     private Label lblReportPages;
     private Stage view;
@@ -62,7 +63,6 @@ public class JasperViewerFX extends Dialog<Void>{
     private int imageHeight = 0; 
     private int imageWidth = 0;
     private int reportPages = 0;
-    private DialogPane dialogPane;
     
     public JasperViewerFX() {
         initModality(Modality.WINDOW_MODAL);
@@ -80,31 +80,31 @@ public class JasperViewerFX extends Dialog<Void>{
     // Scene and button actions
     // ***********************************************
     private BorderPane createContentPane() {
-        print = new Button(null, new ImageView(getClass().getResource("printer.png").toExternalForm()));
-        save = new Button(null, new ImageView(getClass().getResource("save.png").toExternalForm()));
-        backPage = new Button(null, new ImageView(getClass().getResource("backimg.png").toExternalForm()));
-        firstPage = new Button(null, new ImageView(getClass().getResource("firstimg.png").toExternalForm()));
-        nextPage = new Button(null, new ImageView(getClass().getResource("nextimg.png").toExternalForm()));
-        lastPage = new Button(null, new ImageView(getClass().getResource("lastimg.png").toExternalForm()));
-        zoomIn = new Button(null, new ImageView(getClass().getResource("zoomin.png").toExternalForm()));
-        zoomOut = new Button(null, new ImageView(getClass().getResource("zoomout.png").toExternalForm()));
+        btnPrint = new Button(null, new ImageView(getClass().getResource("printer.png").toExternalForm()));
+        btnSave = new Button(null, new ImageView(getClass().getResource("save.png").toExternalForm()));
+        btnBackPage = new Button(null, new ImageView(getClass().getResource("backimg.png").toExternalForm()));
+        btnFirstPage = new Button(null, new ImageView(getClass().getResource("firstimg.png").toExternalForm()));
+        btnNextPage = new Button(null, new ImageView(getClass().getResource("nextimg.png").toExternalForm()));
+        btnLastPage = new Button(null, new ImageView(getClass().getResource("lastimg.png").toExternalForm()));
+        btnZoomIn = new Button(null, new ImageView(getClass().getResource("zoomin.png").toExternalForm()));
+        btnZoomOut = new Button(null, new ImageView(getClass().getResource("zoomout.png").toExternalForm()));
 
-        // Pref sizes
-        print.setPrefSize(30, 30);
-        save.setPrefSize(30, 30);
-        backPage.setPrefSize(30, 30);
-        firstPage.setPrefSize(30, 30);
-        nextPage.setPrefSize(30, 30);
-        lastPage.setPrefSize(30, 30);
-        zoomIn.setPrefSize(30, 30);
-        zoomOut.setPrefSize(30, 30);
-        
-        backAction();
-        nextAction();
-        firstPageAction();
-        lastPageAction();
-        zoomInAction();
-        zoomOutAction();
+        btnPrint.setPrefSize(30, 30);
+        btnSave.setPrefSize(30, 30);
+        btnBackPage.setPrefSize(30, 30);
+        btnFirstPage.setPrefSize(30, 30);
+        btnNextPage.setPrefSize(30, 30);
+        btnLastPage.setPrefSize(30, 30);
+        btnZoomIn.setPrefSize(30, 30);
+        btnZoomOut.setPrefSize(30, 30);
+
+        btnBackPage.setOnAction(event -> renderPage(getCurrentPage() - 1));
+        btnFirstPage.setOnAction(event -> renderPage(1));
+        btnNextPage.setOnAction(event -> renderPage(getCurrentPage() + 1));
+        btnLastPage.setOnAction(event -> renderPage(reportPages));
+        btnZoomIn.setOnAction(event -> zoom(0.15));
+        btnZoomOut.setOnAction(event -> zoom(-0.15));
+
         printAction();
         saveAction();
 
@@ -112,26 +112,27 @@ public class JasperViewerFX extends Dialog<Void>{
         txtPage.setPrefSize(40, 30);
         txtPage.setOnAction(event -> {
             try {
-                int p = Integer.parseInt(txtPage.getText());
-                setCurrentPage((p > 0 && p <= reportPages) ? p : 1);
+                int page = Integer.parseInt(txtPage.getText());
+                renderPage(((page > 0 && page <= reportPages) ? page : 1));
             } catch (NumberFormatException e) {
-                new Alert(Alert.AlertType.WARNING, "Invalid number", ButtonType.OK).show();
+                renderPage(1);
             }
         });
-        
+
         lblReportPages = new Label("/ 1");
 
         HBox menu = new HBox(5);
         menu.setAlignment(Pos.CENTER);
         menu.setPadding(new Insets(5));
         menu.setPrefHeight(50.0);
-        menu.getChildren().addAll(print, save, firstPage, backPage, txtPage, lblReportPages, nextPage, lastPage, zoomIn, zoomOut);
+        menu.getChildren().addAll(btnPrint, btnSave, btnFirstPage, btnBackPage, txtPage, 
+                lblReportPages, btnNextPage, btnLastPage, btnZoomIn, btnZoomOut);
 
         // This imageview will preview the pdf inside scrollpane
         report = new ImageView();
         report.setFitHeight(imageHeight);
         report.setFitWidth(imageWidth);
-        
+
         // Centralizing the ImageView on Scrollpane
         Group contentGroup = new Group();
         contentGroup.getChildren().add(report);
@@ -152,58 +153,39 @@ public class JasperViewerFX extends Dialog<Void>{
         return root;
     }
 
-    private void backAction() {
-        backPage.setOnAction((ActionEvent event) -> {
-            int newValue = getCurrentPage() - 1;
-            setCurrentPage(newValue);
-            
-            // Turn foward buttons on again
-            if (nextPage.isDisabled()) {
-                nextPage.setDisable(false);
-                lastPage.setDisable(false);
-            }
-        });
+    // ***********************************************
+    // Properties
+    // ***********************************************
+
+    /**
+     * Set the currentPage property value
+     * @param pageNumber Page number
+     */
+    public void setCurrentPage(int pageNumber) {
+        currentPage.set(pageNumber);
     }
 
-    private void firstPageAction() {
-        firstPage.setOnAction((ActionEvent event) -> {
-            setCurrentPage(1);
-            
-            // Turn foward buttons on again
-            if (nextPage.isDisabled()) {
-                nextPage.setDisable(false);
-                lastPage.setDisable(false);
-            }
-        });
+    /**
+     * Get the currentPage property value
+     * @return Current page value
+     */
+    public int getCurrentPage() {
+        return currentPage.get();
     }
 
-    private void nextAction() {
-        nextPage.setOnAction((ActionEvent event) -> {
-            int newValue = getCurrentPage() + 1;
-            setCurrentPage(newValue);
-            
-            // Turn previous button on again
-            if (backPage.isDisabled()) {
-                backPage.setDisable(false);
-                firstPage.setDisable(false);
-            }
-        });
+    /**
+     * Get the currentPage property
+     * @return currentPage property
+     */
+    public SimpleIntegerProperty currentPageProperty() {
+        return currentPage;
     }
 
-    private void lastPageAction() {
-        lastPage.setOnAction((ActionEvent event) -> {
-            setCurrentPage(reportPages);
-            
-            // Turn previous button on again
-            if (backPage.isDisabled()) {
-                backPage.setDisable(false);
-                firstPage.setDisable(false);
-            }
-        });
-    }
-
+    // ***********************************************
+    // Button Action
+    // ***********************************************
     private void printAction() {
-        print.setOnAction((ActionEvent event) -> {
+        btnPrint.setOnAction(event -> {
             try {
                 JasperPrintManager.printReport(jasperPrint, true);
                 close();
@@ -214,44 +196,70 @@ public class JasperViewerFX extends Dialog<Void>{
     }
 
     private void saveAction() {
-        save.setOnAction((ActionEvent event) -> {
-            
+        btnSave.setOnAction(event -> {
+            ExtensionFilter pdf = new ExtensionFilter("Portable Document Format", "*.pdf");
+            ExtensionFilter html = new ExtensionFilter("HyperText Markup Language", "*.html");
+            ExtensionFilter xml = new ExtensionFilter("eXtensible Markup Language", "*.xml");
+            ExtensionFilter xls = new ExtensionFilter("Microsoft Excel 2007", "*.xls");
+            ExtensionFilter xlsx = new ExtensionFilter("Microsoft Excel 2016", "*.xlsx");
+
             FileChooser chooser = new FileChooser();
-            FileChooser.ExtensionFilter pdf = new FileChooser.ExtensionFilter("Portable Document Format", "*.pdf");
-            FileChooser.ExtensionFilter html = new FileChooser.ExtensionFilter("HyperText Markup Language", "*.html");
-            FileChooser.ExtensionFilter xml = new FileChooser.ExtensionFilter("eXtensible Markup Language", "*.xml");
-            FileChooser.ExtensionFilter xls = new FileChooser.ExtensionFilter("Microsoft Excel 2007", "*.xls");
-            FileChooser.ExtensionFilter xlsx = new FileChooser.ExtensionFilter("Microsoft Excel 2016", "*.xlsx");
+            chooser.setTitle("Save As");
             chooser.getExtensionFilters().addAll(pdf, html, xml, xls, xlsx);
-            
-            chooser.setTitle("Salvar");
             chooser.setSelectedExtensionFilter(pdf);
+
             File file = chooser.showSaveDialog(view);
-            
+
             if (file != null) {
-                List<String> box = chooser.getSelectedExtensionFilter().getExtensions();
-                
-                switch (box.get(0)) {
-                    case "*.pdf":
-                        exportToPdf(file);
-                        break;
-                    case "*.html":
-                        exportToHtml(file);
-                        break;
-                    case "*.xml":
-                        exportToXml(file);
-                        break;
-                    case "*.xls":
-                        exportToXls(file);
-                        break;
-                    case "*.xlsx":
-                        exportToXlsx(file);
-                        break;
-                    default:
-                        exportToPdf(file);
-                }
+                List<String> selectedExtension = chooser.getSelectedExtensionFilter().getExtensions();
+                exportTo(file, selectedExtension.get(0));
             }
         });
+    }
+
+    /**
+     * When the user reach first or last page he cannot go forward or backward
+     * @param pageNumber Page number
+     */
+    private void disableUnnecessaryButtons(int pageNumber) {
+        boolean isFirstPage = (pageNumber == 1);
+        boolean isLastPage = (pageNumber == reportPages);
+
+        btnBackPage.setDisable(isFirstPage);
+        btnFirstPage.setDisable(isFirstPage);
+        btnNextPage.setDisable(isLastPage);
+        btnLastPage.setDisable(isLastPage);
+    }
+
+    // ***********************************************
+    // Export Utilities
+    // ***********************************************
+
+    /**
+     * Choose the right export method for each file extension
+     * @param file File
+     * @param extension File extension
+     */
+    private void exportTo(File file, String extension) {
+        switch (extension) {
+            case "*.pdf":
+                exportToPdf(file);
+                break;
+            case "*.html":
+                exportToHtml(file);
+                break;
+            case "*.xml":
+                exportToXml(file);
+                break;
+            case "*.xls":
+                exportToXls(file);
+                break;
+            case "*.xlsx":
+                exportToXlsx(file);
+                break;
+            default:
+                exportToPdf(file);
+        }
     }
 
     /**
@@ -264,7 +272,7 @@ public class JasperViewerFX extends Dialog<Void>{
             ex.printStackTrace();
         }
     }
-    
+
     /**
      * Export report to Pdf file
      */
@@ -303,9 +311,9 @@ public class JasperViewerFX extends Dialog<Void>{
             ex.printStackTrace();
         }
     }
-    
+
     /**
-     * @param file
+     * Export report to XML file
      */
     public void exportToXml(File file) {
         try {
@@ -314,88 +322,40 @@ public class JasperViewerFX extends Dialog<Void>{
             ex.printStackTrace();
         }
     }
-    
-    private void zoomInAction() {
-        zoomIn.setOnAction(event -> zoom(0.15));
-    }
-        
-    private void zoomOutAction() {
-        zoomOut.setOnAction(event -> zoom(-0.15));
-    }
+
+    // ***********************************************
+    // Image related methods
+    // ***********************************************
 
     /**
-     * Set the currentPage property and render report page 
-     * @param page Page number
+     * Renderize page to image
+     * @param pageNumber Page number
+     * @throws JRException
      */
-    public void setCurrentPage(int page) {
+    private Image pageToImage(int pageNumber) {
         try {
-            if(page > 0 && page <= reportPages) {
-                currentPage.set(page);
-                txtPage.setText(Integer.toString(page));
-                
-                if (page == 1) {
-                    backPage.setDisable(true);
-                    firstPage.setDisable(true);
-                }
+            float zoom = (float) 1.33;
+            BufferedImage image = (BufferedImage) JasperPrintManager.printPageToImage(jasperPrint, pageNumber - 1, zoom);
+            WritableImage fxImage = new WritableImage(imageHeight, imageWidth);
 
-                if (page == reportPages) {
-                    nextPage.setDisable(true);
-                    lastPage.setDisable(true);
-                }
-                
-                // Rendering the current page
-                float zoom = (float) 1.33;
-                BufferedImage image = (BufferedImage) JasperPrintManager.printPageToImage(jasperPrint, page - 1, zoom);
-                WritableImage fxImage = new WritableImage(imageHeight, imageWidth);
-                report.setImage(SwingFXUtils.toFXImage(image, fxImage));
-            }
+            return SwingFXUtils.toFXImage(image, fxImage);
         } catch (JRException ex) {
             ex.printStackTrace();
         }
+        return null;
     }
-    
-    /**
-     * Get the current page
-     * @return Current page value
-     */
-    public int getCurrentPage() {
-        return currentPage.get();
-    }
-    
-    /**
-     * Get the currentPage property
-     * @return
-     */
-    public SimpleIntegerProperty currentPageProperty() {
-        return currentPage;
-    }
-        
-    /**
-     * Load report from JasperPrint
-     * @param title Dialog title
-     * @param jasperPrint JasperPrint object
-     */
-    public void viewReport(String title, JasperPrint jasperPrint) {
-        this.jasperPrint = jasperPrint;
-        
-        // Report rendered image properties
-        imageHeight = jasperPrint.getPageHeight() + 284;
-        imageWidth = jasperPrint.getPageWidth() + 201;
-        reportPages = jasperPrint.getPages().size();
-        lblReportPages.setText("/ " + reportPages);
-        
-        setCurrentPage(1);
 
-        // With only one page those buttons are unnecessary
-        if (reportPages == 1) {
-            nextPage.setDisable(true);
-            lastPage.setDisable(true);
-        }
-
-        setTitle(title);
-        show();
+    /**
+     * Render specific page on screen
+     * @param pageNumber
+     */
+    private void renderPage(int pageNumber) {
+        setCurrentPage(pageNumber);
+        disableUnnecessaryButtons(pageNumber);
+        txtPage.setText(Integer.toString(pageNumber));
+        report.setImage(pageToImage(pageNumber));
     }
-    
+
     /**
      * Scale image from ImageView
      * @param factor Zoom factor
@@ -407,4 +367,25 @@ public class JasperViewerFX extends Dialog<Void>{
         report.setFitWidth(imageWidth + factor);
     }
 
+    /**
+     * Load report from JasperPrint
+     * @param title Dialog title
+     * @param jasperPrint JasperPrint object
+     */
+    public void viewReport(String title, JasperPrint jasperPrint) {
+        this.jasperPrint = jasperPrint;
+
+        imageHeight = jasperPrint.getPageHeight() + 284;
+        imageWidth = jasperPrint.getPageWidth() + 201;
+        reportPages = jasperPrint.getPages().size();
+        lblReportPages.setText("/ " + reportPages);
+
+        if(reportPages > 0) {
+            renderPage(1);
+        }
+
+        setTitle(title);
+        show();
+    }
+    
 }
