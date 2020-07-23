@@ -21,7 +21,7 @@ JasperReports draw engine relies on awt graphics, drawing each element on a Grap
 	<dependency>
 		<groupId>net.sf.jasperreports</groupId>
 		<artifactId>jasperreports</artifactId>
-		<version>6.7.0</version>
+		<version>6.13.0</version>
 	</dependency>
 </dependencies>
 ```
@@ -58,7 +58,7 @@ try {
 	JasperReport jreport = (JasperReport) JRLoader.loadObject(getClass().getResource("your_resource_path"));
 	JasperPrint jprint = JasperFillManager.fillReport(jreport, null, source);
 	new JasperViewerFX().viewReport("JRBeanCollectionDataSource example", jprint);
-	} catch (JRException e) {
-		e.printStackTrace();
-	}
+} catch (JRException e) {
+	e.printStackTrace();
+}
 ```
